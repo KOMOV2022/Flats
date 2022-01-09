@@ -7,7 +7,8 @@ namespace Flats
         static void showFlets(string sql)
         {
             //todo не показывать квартиры, которые забронированы другими пользователями
-            //todo GIT!!
+            //todo сделать логин уникальным в базе
+            //todo режим риэлтора. У него есть полномочия добавлять квартиры
             using (var connection = new FlatDbConnection())
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
             using (var reader = command.ExecuteReader())
