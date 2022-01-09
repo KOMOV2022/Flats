@@ -36,6 +36,8 @@ namespace Flats
 
         static void Main(string[] args)
         {
+
+
             string name;
             using (var connection = new FlatDbConnection())
             {
