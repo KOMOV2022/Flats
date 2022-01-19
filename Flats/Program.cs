@@ -6,6 +6,7 @@ namespace Flats
     {
         static void showFlets(string sql)
         {
+            //
             //todo не показывать квартиры, которые забронированы другими пользователями
             //todo сделать логин уникальным в базе
             //todo режим риэлтора. У него есть полномочия добавлять квартиры
@@ -14,6 +15,7 @@ namespace Flats
             using (var reader = command.ExecuteReader())
             {
                 //новый вариант (без указания имен стообцов)
+                /*
                 var schema = reader.GetColumnSchemaAsync().Result;
                 foreach (var column in schema) Console.Write(column.ColumnName + "\t");
                 Console.WriteLine();
@@ -24,12 +26,12 @@ namespace Flats
                         valuesStr += reader[column.ColumnName] + "\t";
                     Console.WriteLine(valuesStr);
                 }
-
+                */
                 //как было
-                //Console.WriteLine("ID\trooms\tfloore\tFullSquare\tTenant");
-                //while (reader.Read())
-                //    Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
-                //        $"{reader["floore"]}\t{reader["FullSquare"]}\t\t{reader["Tenant"]}");
+                Console.WriteLine("ID    rooms   floore  FullSquare  Tenant");
+                while (reader.Read())
+                    Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
+                       $"{reader["floore"]}\t{reader["FullSquare"]}\t  {reader["Tenant"]}");
             }
 
 
@@ -78,19 +80,23 @@ namespace Flats
                     break;
                 } while (true);
             }
-
-
-            Console.Write("Просмотреть все результаты FullSquare введите Y:");
-            char a = char.Parse(Console.ReadLine());
-            if ((a == 'y') || (a == 'Y')) 
-                showFlets("select * from Flat order by 'id'");
+            if (name == "admin")
+                name = "admin";
             else
             {
-                Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
-                var str = Console.ReadLine().Split();
-                int min = int.Parse(str[0]);
-                int max = int.Parse(str[1]);
-                showFlets($"select * from Flat where FullSquare < {max} and  FullSquare > {min} order by id");
+                Console.Write("Просмотреть все результаты FullSquare введите Y:");
+
+                char a = char.Parse(Console.ReadLine());
+                if ((a == 'y') || (a == 'Y'))
+                    showFlets("select ID, rooms, floore, FullSquare, Tenant from Flat order by 'id'");
+                else
+                {
+                    Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
+                    var str = Console.ReadLine().Split();
+                    int min = int.Parse(str[0]);
+                    int max = int.Parse(str[1]);
+                    showFlets($"select * from Flat where FullSquare < {max} and  FullSquare > {min} order by id");
+                }
             }
 
             Console.Write("Какой вариант подходит? Введите 'id':");
@@ -103,7 +109,7 @@ namespace Flats
                     command.ExecuteNonQuery();
             }
             
-            showFlets($"select * from Flat where id = {idFlat}");
+            showFlets($"select * from Flat where Tenant = '{name}'");
         }
     }
 }
