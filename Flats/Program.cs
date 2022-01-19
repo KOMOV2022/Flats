@@ -6,7 +6,7 @@ namespace Flats
     {
         //todo режим риэлтора. У него есть полномочия добавлять/удалять квартиры
         //и он видит все квартиры
-        //todo скопировать базу на DNS машину
+        //todo скопировать базу на DNS машинуp;o
         static void showFlets(string sql)
         {
             using (var connection = new FlatDbConnection())
@@ -80,7 +80,7 @@ namespace Flats
                 var str = Console.ReadLine().Split();
                 int min = int.Parse(str[0]);
                 int max = int.Parse(str[1]);
-                showFlets($"select * from Flat where FullSquare < {max} and  FullSquare > {min} order by id");
+                showFlets($"select * from Flat where FullSquare between {max} and {min} order by id");
             }
 
         }
