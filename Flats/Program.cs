@@ -6,6 +6,7 @@ namespace Flats
     {
         //todo режим риэлтора. У него есть полномочия добавлять/удалять квартиры
         //и он видит все квартиры
+        //todo скопировать базу на DNS машину
         static void showFlets(string sql)
         {
             using (var connection = new FlatDbConnection())
