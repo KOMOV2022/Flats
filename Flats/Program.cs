@@ -90,6 +90,27 @@ namespace Flats
            string name = autorise();
             if (name == null)
                 return;
+            if(name == "admin")
+            {
+                Console.WriteLine($"Чем займёмся '{name}'");
+                showFlets("select * from Flat order by 'id'");
+                Console.Write("Чтобы добавить запись введите 'add' чтобы удалить 'del': ");
+                string? str = Console.ReadLine();
+                if(str == "add")
+                {
+                    Console.Write($"Введите значения полей через пробел" +
+                        $" (id rooms floore FullSquare Tenant): ");
+                    var adStr = Console.ReadLine().Split();
+                    int[] adInt = new int[adStr.Length - 1];
+                    for (int i = 0; i < adStr.Length - 1; i++)
+                        adInt[i] = int.Parse(adStr[i]);
+
+                    showFlets($"INSERT INTO Flat VALUES" +
+                        $" ({adInt[0]}, {adInt[1]}, {adInt[2]}, {adInt[3]}, {adStr[4]});");
+                    return;
+                }
+            }
+
             choice();
 
             Console.Write("Какой вариант подходит? Введите 'id':");
