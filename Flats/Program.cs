@@ -95,7 +95,9 @@ namespace Flats
 
                 if (name == "admin")
                 {
-                    Console.WriteLine($"Чем займёмся '{name}'");
+                    Console.WriteLine($"Чем займёмся " +
+                        $"" +
+                        $"{name}");
                     showFlets("select * from Flat order by 'id'");
 
                     while (true)
