@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+//using System.SQLite.;
 
 namespace Flats
 {
@@ -25,18 +26,44 @@ namespace Flats
         //свой для delete и т.д. (а сейчас для всего используется showFlets, и это не очень)
 
         //todo зарефачить так чтобы методы были не длиннее 30 строк, классы не длиннее 300.
+        static void connectDb(string sql)
+        {
+            using (var connection = new FlatDbConnection())
+            {
 
+                using (var command = new SQLiteCommand(sql, connection.Sqlite))                                                                                           
+                    command.ExecuteNonQuery();
+            }
+
+        }
+        
+        static int connectDbReturn(string sql)
+        {
+            int someData = 0;
+            using (var connection = new FlatDbConnection())
+            using (var command = new SQLiteCommand(sql, connection.Sqlite))
+            using (var reader = command.ExecuteReader())               
+            {
+                while (reader.Read())
+                    someData = reader.GetInt32(0);
+            }
+            return someData;   
+        }           
         static void showFlets(string sql)
         {
             using (var connection = new FlatDbConnection())
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
             using (var reader = command.ExecuteReader())
             {
-                Console.WriteLine("ID    rooms   floore  FullSquare  Tenant");
+                Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
                 while (reader.Read())
+                {
                     Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
                        $"{reader["floore"]}\t{reader["FullSquare"]}\t  {reader["Tenant"]}");
+                    
+                }
             }
+            
         }
 
         static string? GetUserPassword(string login)
@@ -48,7 +75,9 @@ namespace Flats
                 using (var command = new SQLiteCommand(sql, connection.Sqlite))
                 using (var reader = command.ExecuteReader())
                 {
-                    if (reader.HasRows) result = reader["password"]?.ToString();
+                    if (reader.HasRows)
+                        while(reader.Read())
+                        result = reader["password"].ToString();
                 }
             }
             return result;
@@ -59,7 +88,6 @@ namespace Flats
             string name;
             do
             {
-
                 Console.Write("Введите логин:");
                 name = Console.ReadLine();
                 if (string.IsNullOrEmpty(name))
@@ -104,6 +132,10 @@ namespace Flats
                 showFlets($"select * from Flat where FullSquare < {max} and FullSquare > {min} order by id");
             }
         }
+        static void addRow()
+        {
+
+        }
 
         static void Main(string[] args)
         {
@@ -125,16 +157,29 @@ namespace Flats
                         if (str == "add")
                         {
                             Console.Write($"Введите значения полей через пробел" +
-                                $" (id rooms floore FullSquare Tenant): ");
+                                $" (rooms (от 1 до 3) floore (от 1 до 18) FullSquare(от 16 до 99)): ");
                             var adStr = Console.ReadLine().Split();
-                            int[] adInt = new int[adStr.Length - 1];
-                            for (int i = 0; i < adStr.Length - 1; i++)
-                                adInt[i] = int.Parse(adStr[i]);
+                            int?[] adInt = new int?[adStr.Length + 2];
+                            for (int i = 1; i <= adStr.Length; i++)
+                                adInt[i] = int.Parse(adStr[i - 1]);
 
-                            showFlets($"INSERT INTO Flat VALUES" +
-                                $" ({adInt[0]}, {adInt[1]}, {adInt[2]}, {adInt[3]}, {adStr[4]});");
-                            showFlets("select * from Flat order by 'id'");
+                            if ((adInt[1] < 4 && adInt[1] > 0)
+                                && (adInt[2] > 0 && adInt[2] < 19)
+                                && (adInt[3] > 15 && adInt[3] < 100))
+                            {
+                                int lostRowsId = connectDbReturn($"SELECT id from Flat" +
+                                    $" order by id desc limit 1 ");
+                                connectDb($"INSERT INTO Flat VALUES" +
+                                   $" ({lostRowsId + 1},{adInt[1]}, {adInt[2]}," +
+                                   $" {adInt[3]}, {adInt[4] = 0})");
+                                showFlets("select * from Flat order by 'id'");
+                                continue;
+                            }
+                            else
+                                Console.WriteLine($"Значения некорректны." +
+                                    $" Будте внимательнее!");
                             continue;
+
                         }
                         else if (str == "del")
                         {
