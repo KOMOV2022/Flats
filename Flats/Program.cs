@@ -5,19 +5,19 @@ namespace Flats
 {
     class Program
     {
-        //todo валидация на функцию add (добавление квартир)
+        //todo валидация на функцию add (добавление квартир) *
 
-        //todo не-админ вообще не должен иметь возможности
-        //увидеть забронированные другими квартиры
+        //todo не-админ вообще не должен иметь возможности *
+        //увидеть забронированные другими квартиры *
 
         //todo после бронирования давать выбор - бронировать ещё или выйти
-        //todo пароль не должен быть виден, когда его набираешь
+        //todo пароль не должен быть виден, когда его набираешь *
 
         //todo Ситуация. Я отфильтровал квартиры по площади, и не вижу там той, 
         //которую хочу забронировать.Я теперь хочу вывести все квартиры,чтобы найти её.
         //Я не могу это сделать, пока не поставлю бронь. А такая возможность нужна.
 
-        //todo сделать айдишник автоинкрементным
+        //todo сделать айдишник автоинкрементным *
 
         //todo добавить признак администратора в таблицу User, чтобы любого
         //юзера можно было сделать админом или наоборот
@@ -48,7 +48,8 @@ namespace Flats
                     someData = reader.GetInt32(0);
             }
             return someData;   
-        }           
+        }
+        
         static void showFlets(string sql)
         {
             using (var connection = new FlatDbConnection())
@@ -82,10 +83,9 @@ namespace Flats
             }
             return result;
         }
-
+        static string? name;
         static string autorise()
         {
-            string name;
             do
             {
                 Console.Write("Введите логин:");
@@ -95,16 +95,30 @@ namespace Flats
                     Console.WriteLine("Astalavista!");
                     return null;
                 }
-
                 var passwordFromDb = GetUserPassword(name);
                 if (passwordFromDb == null)
                 {
                     Console.WriteLine("Wrong login!");
                     continue;
                 }
-
                 Console.Write("Введите пароль:");
-                var password = Console.ReadLine();
+                var password = "";
+                ConsoleKeyInfo key;
+                do
+                {
+                    key = Console.ReadKey(true);
+                    if (key.Key == ConsoleKey.Enter)
+                    {
+                        Console.Write("\n");
+                        break;
+                    }
+                    else if (key.Key != ConsoleKey.Backspace)
+                    {
+                        password += key.KeyChar;
+                        Console.Write("*");
+                    }
+                }
+                while (true);
                 if (passwordFromDb != password)
                 {
                     Console.WriteLine("Wrong password!");
@@ -122,7 +136,8 @@ namespace Flats
 
             char a = char.Parse(Console.ReadLine());
             if ((a == 'y') || (a == 'Y'))
-                showFlets("select ID, rooms, floore, FullSquare, Tenant from Flat order by 'id'");
+                showFlets($"SELECT * FROM Flat " +
+                    $"WHERE Tenant = '{name}' OR Tenant is NULL");
             else
             {
                 Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
@@ -131,10 +146,6 @@ namespace Flats
                 int max = int.Parse(str[1]);
                 showFlets($"select * from Flat where FullSquare < {max} and FullSquare > {min} order by id");
             }
-        }
-        static void addRow()
-        {
-
         }
 
         static void Main(string[] args)
@@ -159,7 +170,7 @@ namespace Flats
                             Console.Write($"Введите значения полей через пробел" +
                                 $" (rooms (от 1 до 3) floore (от 1 до 18) FullSquare(от 16 до 99)): ");
                             var adStr = Console.ReadLine().Split();
-                            int?[] adInt = new int?[adStr.Length + 2];
+                            int?[] adInt = new int?[adStr.Length + 1];
                             for (int i = 1; i <= adStr.Length; i++)
                                 adInt[i] = int.Parse(adStr[i - 1]);
 
@@ -167,11 +178,12 @@ namespace Flats
                                 && (adInt[2] > 0 && adInt[2] < 19)
                                 && (adInt[3] > 15 && adInt[3] < 100))
                             {
+                                string tenant = "null";
                                 int lostRowsId = connectDbReturn($"SELECT id from Flat" +
                                     $" order by id desc limit 1 ");
                                 connectDb($"INSERT INTO Flat VALUES" +
                                    $" ({lostRowsId + 1},{adInt[1]}, {adInt[2]}," +
-                                   $" {adInt[3]}, {adInt[4] = 0})");
+                                   $" {adInt[3]}, {tenant})");
                                 showFlets("select * from Flat order by 'id'");
                                 continue;
                             }
@@ -196,18 +208,15 @@ namespace Flats
                 if (name == "admin")
                     continue;
 
-                    choice();
-
+                choice();
                 Console.Write("Какой вариант подходит? Введите 'id':");
                 var idFlat = Console.ReadLine();
-
                 using (var connection = new FlatDbConnection())
                 {
                     var sql = $"update Flat set Tenant = '{name}' WHERE id = {idFlat}";
                     using (var command = new SQLiteCommand(sql, connection.Sqlite))
                         command.ExecuteNonQuery();
-                }
-
+                }                
                 showFlets($"select * from Flat where Tenant = '{name}' or Tenant is null");
                 return;
             }
