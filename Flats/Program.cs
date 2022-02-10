@@ -13,9 +13,10 @@ namespace Flats
         //todo после бронирования давать выбор - бронировать ещё или выйти
         //todo пароль не должен быть виден, когда его набираешь *
 
-        //todo Ситуация. Я отфильтровал квартиры по площади, и не вижу там той, 
-        //которую хочу забронировать.Я теперь хочу вывести все квартиры,чтобы найти её.
-        //Я не могу это сделать, пока не поставлю бронь. А такая возможность нужна.
+        //todo Ситуация. Я отфильтровал квартиры по площади, и не вижу там той, *
+        //которую хочу забронировать.Я теперь хочу вывести все квартиры,чтобы найти её. *
+        //Я не могу это сделать, пока не поставлю бронь. А такая возможность нужна. *
+
 
         //todo сделать айдишник автоинкрементным *
 
@@ -31,25 +32,36 @@ namespace Flats
             using (var connection = new FlatDbConnection())
             {
 
-                using (var command = new SQLiteCommand(sql, connection.Sqlite))                                                                                           
+                using (var command = new SQLiteCommand(sql, connection.Sqlite))
                     command.ExecuteNonQuery();
             }
 
         }
-        
+        static string? priznakAdmin(string sql)
+        {
+            string? someData = "cooll";
+            using (var connection = new FlatDbConnection())
+            using (var command = new SQLiteCommand(sql, connection.Sqlite))
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader == null)
+                    someData = "null";
+            }
+            return someData;
+        }
         static int connectDbReturn(string sql)
         {
             int someData = 0;
             using (var connection = new FlatDbConnection())
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
-            using (var reader = command.ExecuteReader())               
+            using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
                     someData = reader.GetInt32(0);
             }
-            return someData;   
+            return someData;
         }
-        
+
         static void showFlets(string sql)
         {
             using (var connection = new FlatDbConnection())
@@ -61,10 +73,10 @@ namespace Flats
                 {
                     Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
                        $"{reader["floore"]}\t{reader["FullSquare"]}\t  {reader["Tenant"]}");
-                    
+
                 }
             }
-            
+
         }
 
         static string? GetUserPassword(string login)
@@ -77,8 +89,8 @@ namespace Flats
                 using (var reader = command.ExecuteReader())
                 {
                     if (reader.HasRows)
-                        while(reader.Read())
-                        result = reader["password"].ToString();
+                        while (reader.Read())
+                            result = reader["password"].ToString();
                 }
             }
             return result;
@@ -90,6 +102,7 @@ namespace Flats
             {
                 Console.Write("Введите логин:");
                 name = Console.ReadLine();
+
                 if (string.IsNullOrEmpty(name))
                 {
                     Console.WriteLine("Astalavista!");
@@ -132,27 +145,51 @@ namespace Flats
 
         static void choice()
         {
-            Console.Write("Просмотреть все результаты FullSquare введите Y:");
-
-            char a = char.Parse(Console.ReadLine());
-            if ((a == 'y') || (a == 'Y'))
-                showFlets($"SELECT * FROM Flat " +
-                    $"WHERE Tenant = '{name}' OR Tenant is NULL");
-            else
+           
+                Console.Write("Просмотреть все результаты FullSquare введите Y:");
+                char a = char.Parse(Console.ReadLine());
+            while (true)
             {
-                Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
-                var str = Console.ReadLine().Split();
-                int min = int.Parse(str[0]);
-                int max = int.Parse(str[1]);
-                showFlets($"select * from Flat where FullSquare < {max} and FullSquare > {min} order by id");
+                if ((a == 'y') || (a == 'Y'))
+                {
+                    showFlets($"SELECT * FROM Flat " +
+                        $"WHERE Tenant = '{name}' OR Tenant is NULL");
+                    break;
+
+                }
+                else
+                {
+                    Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
+                    var str = Console.ReadLine().Split();
+                    int min = int.Parse(str[0]);
+                    int max = int.Parse(str[1]);
+                    showFlets($"select *" +
+                        $" from Flat where FullSquare < {max}" +
+                        $" and FullSquare > {min} order by id");
+
+                    Console.Write("Если нет вариантов вернёмся к " +
+                            "полному списку y/n:");
+                    string y_n = Console.ReadLine();
+                    if (y_n == "y")
+                        showFlets($"SELECT * FROM Flat " +
+                            $"WHERE Tenant = '{name}' OR Tenant is NULL");
+                    else
+                        break;
+
+                }
             }
         }
 
+
+        static string? priznak;
         static void Main(string[] args)
         {
             while (true)
             {
                 string name = autorise();
+                priznak = priznakAdmin($"SELECT big_boss FROM User WHERE login = '{name}'");
+                    if (priznak != "null")
+                        name = "admin";
                 if (name == null)
                     return;
 
@@ -188,20 +225,23 @@ namespace Flats
                                 continue;
                             }
                             else
+                            {
                                 Console.WriteLine($"Значения некорректны." +
                                     $" Будте внимательнее!");
-                            continue;
+                                continue;
+                            }
+
 
                         }
                         else if (str == "del")
                         {
                             Console.Write("Id строки которую хотите удалить: ");
                             int del = int.Parse(Console.ReadLine());
-                            showFlets($"DELETE FROM Flat WHERE id = '{del}'");
+                            connectDb($"DELETE FROM Flat WHERE id = '{del}'");
                             showFlets("select * from Flat order by 'id'");
                             continue;
                         }
-                        else break;
+                        else return;
                     }
 
                 }
@@ -209,16 +249,28 @@ namespace Flats
                     continue;
 
                 choice();
-                Console.Write("Какой вариант подходит? Введите 'id':");
-                var idFlat = Console.ReadLine();
-                using (var connection = new FlatDbConnection())
+                
+
+                while (true)
                 {
-                    var sql = $"update Flat set Tenant = '{name}' WHERE id = {idFlat}";
-                    using (var command = new SQLiteCommand(sql, connection.Sqlite))
-                        command.ExecuteNonQuery();
-                }                
-                showFlets($"select * from Flat where Tenant = '{name}' or Tenant is null");
-                return;
+                    
+                    Console.Write("Какой вариант подходит? Введите 'id':");
+                    var idFlat = Console.ReadLine();
+                    using (var connection = new FlatDbConnection())
+                    {
+                        var sql = $"update Flat set Tenant = '{name}' WHERE id = {idFlat}";
+                        using (var command = new SQLiteCommand(sql, connection.Sqlite))
+                            command.ExecuteNonQuery();
+                    }
+                    showFlets($"select * from Flat where Tenant = '{name}' or Tenant is null");
+                    Console.Write("Желаете продолжить? y/n: ");
+                    var strFlat = Console.ReadLine();
+                    if (strFlat == "y")
+                        break;
+                    else
+                        return;
+                }
+                
             }
         }
     }
