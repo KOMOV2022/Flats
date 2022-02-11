@@ -39,13 +39,15 @@ namespace Flats
         }
         static string? priznakAdmin(string sql)
         {
-            string? someData = "";
+            string? someData = "slave";
             using (var connection = new FlatDbConnection())
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
             using (var reader = command.ExecuteReader())
             {
-                if (reader == null)
-                    someData = reader.ToString();
+                if (reader.HasRows)
+                    while(reader.Read())
+                        someData = reader.GetString(0);
+
             }
             return someData;
         }
@@ -188,7 +190,7 @@ namespace Flats
             {
                 string name = autorise();
                 priznak = priznakAdmin($"SELECT big_boss FROM User WHERE login = '{name}'");
-                if (priznak != "null")
+                if (priznak == "master")
                     name = "admin";
 
                 else if (name == null)
