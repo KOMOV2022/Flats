@@ -5,8 +5,6 @@ namespace Flats
 {
     class Program
     {
-        //todo валидация на функцию add (добавление квартир) *
-
         //todo не-админ вообще не должен иметь возможности *
         //увидеть забронированные другими квартиры *
 
@@ -212,18 +210,19 @@ namespace Flats
                             var adStr = Console.ReadLine().Split();
                             int?[] adInt = new int?[adStr.Length + 1];
                             for (int i = 1; i <= adStr.Length; i++)
-                                adInt[i] = int.Parse(adStr[i - 1]);
+                                adInt[i] = int.Parse(adStr[i - 1]); //review нужна валидация ввода. 
+                                                                    //Сейчас при любом некорректном вводе будет необработанное исключение
 
                             if ((adInt[1] < 4 && adInt[1] > 0)
                                 && (adInt[2] > 0 && adInt[2] < 19)
                                 && (adInt[3] > 15 && adInt[3] < 100))
                             {
-                                string tenant = "null";
+                                string tenant = "null"; //review зачем нужна эта переменная?
                                 int lostRowsId = connectDbReturn($"SELECT id from Flat" +
                                     $" order by id desc limit 1 ");
                                 connectDb($"INSERT INTO Flat VALUES" +
                                    $" ({lostRowsId + 1},{adInt[1]}, {adInt[2]}," +
-                                   $" {adInt[3]}, {tenant})");
+                                   $" {adInt[3]}, {tenant})");  
                                 showFlets("select * from Flat order by 'id'");
                                 continue;
                             }
