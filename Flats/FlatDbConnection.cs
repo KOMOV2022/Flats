@@ -18,7 +18,7 @@ namespace Flats
             Sqlite = null;
         }
 
-        private SQLiteConnection createConnection()
+        private SQLiteConnection createConnection() //review предлагаю заинлайнить
         {
             var connection = new SQLiteConnection();
             connection.ConnectionString = "Data Source=Flat.db";

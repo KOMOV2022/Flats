@@ -1,13 +1,9 @@
 ﻿using System.Data.SQLite;
-//using System.SQLite.;
 
 namespace Flats
 {
     class Program
     {
-        //todo не-админ вообще не должен иметь возможности *
-        //увидеть забронированные другими квартиры *
-
         //todo после бронирования давать выбор - бронировать ещё или выйти
         //todo пароль не должен быть виден, когда его набираешь *
 
@@ -165,7 +161,7 @@ namespace Flats
                     int max = int.Parse(str[1]);
                     showFlets($"select *" +
                         $" from Flat where FullSquare < {max}" +
-                        $" and FullSquare > {min} order by id");
+                        $" and FullSquare > {min} order by id"); //review тут всё ещё можно увидеть квартиры, забронированные другими
 
                     Console.Write("Если нет вариантов вернёмся к " +
                             "полному списку y/n:");
@@ -187,7 +183,8 @@ namespace Flats
             while (true)
             {
                 string name = autorise();
-                priznak = priznakAdmin($"SELECT big_boss FROM User WHERE login = '{name}'");
+                //review Захардкодить SQL внутри метода, как параметр не передавать
+                priznak = priznakAdmin($"SELECT big_boss FROM User WHERE login = '{name}'"); 
                 if (priznak == "master")
                     name = "admin";
 
@@ -197,6 +194,7 @@ namespace Flats
                 if (name == "admin")
                 {
                     Console.WriteLine($"Чем займёмся {name}");
+                    //review Захардкодить SQL внутри метода, как параметр не передавать
                     showFlets("select * from Flat order by 'id'");
 
                     while (true)
@@ -212,13 +210,15 @@ namespace Flats
                             for (int i = 1; i <= adStr.Length; i++)
                                 adInt[i] = int.Parse(adStr[i - 1]); //review нужна валидация ввода. 
                                                                     //Сейчас при любом некорректном вводе будет необработанное исключение
+                                                                    //используй TryParse
 
                             if ((adInt[1] < 4 && adInt[1] > 0)
                                 && (adInt[2] > 0 && adInt[2] < 19)
                                 && (adInt[3] > 15 && adInt[3] < 100))
                             {
                                 string tenant = "null"; //review зачем нужна эта переменная?
-                                int lostRowsId = connectDbReturn($"SELECT id from Flat" +
+                                //review Захардкодить SQL внутри метода, как параметр не передавать
+                                int lostRowsId = connectDbReturn($"SELECT id from Flat" +   
                                     $" order by id desc limit 1 ");
                                 connectDb($"INSERT INTO Flat VALUES" +
                                    $" ({lostRowsId + 1},{adInt[1]}, {adInt[2]}," +
@@ -239,8 +239,10 @@ namespace Flats
                         {
                             Console.Write("Id строки которую хотите удалить: ");
                             int del = int.Parse(Console.ReadLine());
+                            //review Захардкодить SQL внутри метода, как параметр не передавать
                             connectDb($"DELETE FROM Flat WHERE id = '{del}'");
-                            showFlets("select * from Flat order by 'id'");
+                            //review Захардкодить SQL внутри метода, как параметр не передавать
+                            showFlets("select * from Flat order by 'id'"); 
                             continue;
                         }
                         else return;
@@ -248,7 +250,7 @@ namespace Flats
 
                 }
                 if (name == "admin")
-                    continue;
+                    continue;       //review перенеси continue в конец if, который на 198 строке
 
                 choice();
                 
@@ -258,12 +260,14 @@ namespace Flats
                     
                     Console.Write("Какой вариант подходит? Введите 'id':");
                     var idFlat = Console.ReadLine();
+                    //review вынести в метод
                     using (var connection = new FlatDbConnection())
                     {
                         var sql = $"update Flat set Tenant = '{name}' WHERE id = {idFlat}";
                         using (var command = new SQLiteCommand(sql, connection.Sqlite))
                             command.ExecuteNonQuery();
                     }
+                    //review Захардкодить SQL внутри метода, как параметр не передавать
                     showFlets($"select * from Flat where Tenant = '{name}' or Tenant is null");
                     Console.Write("Желаете продолжить? y/n: ");
                     var strFlat = Console.ReadLine();
