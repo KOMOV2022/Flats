@@ -4,24 +4,19 @@ namespace Flats
 {
     class Program
     {
-        //todo после бронирования давать выбор - бронировать ещё или выйти
-        //todo пароль не должен быть виден, когда его набираешь *
-
         //todo Ситуация. Я отфильтровал квартиры по площади, и не вижу там той, *
         //которую хочу забронировать.Я теперь хочу вывести все квартиры,чтобы найти её. *
         //Я не могу это сделать, пока не поставлю бронь. А такая возможность нужна. *
-
-
         //todo сделать айдишник автоинкрементным *
 
         //todo добавить признак администратора в таблицу User, чтобы любого
         //юзера можно было сделать админом или наоборот
-
         //todo избавляемся от sql внутри Main. Выносим его в методы: свой для select,
         //свой для delete и т.д. (а сейчас для всего используется showFlets, и это не очень)
-
         //todo зарефачить так чтобы методы были не длиннее 30 строк, классы не длиннее 300.
-        static void connectDb(string sql)
+        //todo после бронирования давать выбор - бронировать ещё или выйти
+
+        static void connectDb(string sql) //review параметр убрать, SQL захардкодить внутри метода
         {
             using (var connection = new FlatDbConnection())
             {
@@ -31,9 +26,9 @@ namespace Flats
             }
 
         }
-        static string? priznakAdmin(string sql)
+        static string? priznakAdmin(string sql) //review параметр убрать, SQL захардкодить внутри метода
         {
-            string? someData = "slave";
+            string? someData = "slave"; 
             using (var connection = new FlatDbConnection())
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
             using (var reader = command.ExecuteReader())
@@ -45,7 +40,7 @@ namespace Flats
             }
             return someData;
         }
-        static int connectDbReturn(string sql)
+        static int connectDbReturn(string sql) //review параметр убрать, SQL захардкодить внутри метода
         {
             int someData = 0;
             using (var connection = new FlatDbConnection())
@@ -58,7 +53,7 @@ namespace Flats
             return someData;
         }
 
-        static void showFlets(string sql)
+        static void showFlets(string sql) //review параметр убрать, SQL захардкодить внутри метода
         {
             using (var connection = new FlatDbConnection())
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
@@ -111,6 +106,7 @@ namespace Flats
                     continue;
                 }
                 Console.Write("Введите пароль:");
+                //review ввод пароля - хороший кандидат на вынос в отдельный метод.
                 var password = "";
                 ConsoleKeyInfo key;
                 do
@@ -121,7 +117,9 @@ namespace Flats
                         Console.Write("\n");
                         break;
                     }
-                    else if (key.Key != ConsoleKey.Backspace)
+                    else if (key.Key != ConsoleKey.Backspace)   //review не вижу результат стирания символов
+                                                                //По этой теме:
+                                                                //https://stackoverflow.com/questions/3404421/password-masking-console-application
                     {
                         password += key.KeyChar;
                         Console.Write("*");
@@ -141,9 +139,10 @@ namespace Flats
 
         static void choice()
         {
-           
-                Console.Write("Просмотреть все результаты FullSquare введите Y:");
-                char a = char.Parse(Console.ReadLine());
+            //review Текст непонятный. Показывать тут текст, который бы понял пользователь, видящий наш интерфейс впервые
+            Console.Write("Просмотреть все результаты FullSquare введите Y:"); 
+            char a = char.Parse(Console.ReadLine());    //review Тут крашится. Используй TryParse для валидации ввода. 
+                                                        //или можно сделать ReadKey
             while (true)
             {
                 if ((a == 'y') || (a == 'Y'))
@@ -183,10 +182,13 @@ namespace Flats
             while (true)
             {
                 string name = autorise();
-                //review Захардкодить SQL внутри метода, как параметр не передавать
-                priznak = priznakAdmin($"SELECT big_boss FROM User WHERE login = '{name}'"); 
+                priznak = priznakAdmin($"SELECT big_boss FROM User WHERE login = '{name}'");
                 if (priznak == "master")
-                    name = "admin";
+                    name = "admin";     //review менять name плохо, потому что сбивает с толку -
+                                        //ведь имя у админа может быть и отличное от admin.
+                                        //Кроме того, это не нужно, потому что можно на строке
+                                        //if (name == "admin")
+                                        //проверять признак, а не name
 
                 else if (name == null)
                     return;
@@ -194,7 +196,6 @@ namespace Flats
                 if (name == "admin")
                 {
                     Console.WriteLine($"Чем займёмся {name}");
-                    //review Захардкодить SQL внутри метода, как параметр не передавать
                     showFlets("select * from Flat order by 'id'");
 
                     while (true)
@@ -217,12 +218,11 @@ namespace Flats
                                 && (adInt[3] > 15 && adInt[3] < 100))
                             {
                                 string tenant = "null"; //review зачем нужна эта переменная?
-                                //review Захардкодить SQL внутри метода, как параметр не передавать
-                                int lostRowsId = connectDbReturn($"SELECT id from Flat" +   
+                                int lostRowsId = connectDbReturn($"SELECT id from Flat" +
                                     $" order by id desc limit 1 ");
                                 connectDb($"INSERT INTO Flat VALUES" +
                                    $" ({lostRowsId + 1},{adInt[1]}, {adInt[2]}," +
-                                   $" {adInt[3]}, {tenant})");  
+                                   $" {adInt[3]}, {tenant})");
                                 showFlets("select * from Flat order by 'id'");
                                 continue;
                             }
@@ -239,10 +239,8 @@ namespace Flats
                         {
                             Console.Write("Id строки которую хотите удалить: ");
                             int del = int.Parse(Console.ReadLine());
-                            //review Захардкодить SQL внутри метода, как параметр не передавать
                             connectDb($"DELETE FROM Flat WHERE id = '{del}'");
-                            //review Захардкодить SQL внутри метода, как параметр не передавать
-                            showFlets("select * from Flat order by 'id'"); 
+                            showFlets("select * from Flat order by 'id'");
                             continue;
                         }
                         else return;
@@ -251,13 +249,14 @@ namespace Flats
                 }
                 if (name == "admin")
                     continue;       //review перенеси continue в конец if, который на 198 строке
+                                    //потому что это по логике это одно и то же условие, так зачем два ифа?
 
                 choice();
-                
+
 
                 while (true)
                 {
-                    
+
                     Console.Write("Какой вариант подходит? Введите 'id':");
                     var idFlat = Console.ReadLine();
                     //review вынести в метод
@@ -267,7 +266,6 @@ namespace Flats
                         using (var command = new SQLiteCommand(sql, connection.Sqlite))
                             command.ExecuteNonQuery();
                     }
-                    //review Захардкодить SQL внутри метода, как параметр не передавать
                     showFlets($"select * from Flat where Tenant = '{name}' or Tenant is null");
                     Console.Write("Желаете продолжить? y/n: ");
                     var strFlat = Console.ReadLine();
@@ -276,7 +274,7 @@ namespace Flats
                     else
                         return;
                 }
-                
+
             }
         }
     }
