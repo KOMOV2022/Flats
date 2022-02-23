@@ -8,7 +8,8 @@ namespace Flats
         //todo зарефачить так чтобы методы были не длиннее 30 строк, классы не длиннее 300.
         //todo после бронирования давать выбор - бронировать ещё или выйти
 
-        static void connectDb(string sql) //review параметр убрать, SQL захардкодить внутри метода
+        static void connectDb(string sql)   //review два метода сделать - один для добавления, другой для удаления,
+                                            //И в обоих SQL внутри захардкодить
         {
             using (var connection = new FlatDbConnection())
             {
@@ -32,7 +33,8 @@ namespace Flats
             }
             return someData;
         }
-        static int connectDbReturn(string sql) //review параметр убрать, SQL захардкодить внутри метода
+        //review убрать
+        static int connectDbReturn(string sql) 
         {
             int someData = 0;
             using (var connection = new FlatDbConnection())
@@ -45,7 +47,7 @@ namespace Flats
             return someData;
         }
 
-        static void showFlets(string sql) //review параметр убрать, SQL захардкодить внутри метода
+        static void showFlets(string sql) //review сделать 3(?) разных метода, везде захардкодить SQL
         {
             using (var connection = new FlatDbConnection())
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
@@ -133,24 +135,21 @@ namespace Flats
             return name;
         }
 
-        //review длинный метод
-        //review То, что делает метод, должно быть легко объяснить в паре слов. Здесь мне непонятно.
-        static void choice()    
+        static void FlatsViewMode()    
         {
-            //review Текст непонятный. Показывать тут текст, который бы понял пользователь, видящий наш интерфейс впервые
-            Console.Write("Просмотреть все результаты FullSquare введите Y:"); 
-            char a = char.Parse(Console.ReadLine());    //review Тут крашится. Используй TryParse для валидации ввода. 
-                                                        //или можно сделать ReadKey вместо ReadLine
-            while (true)
+            char? a = null;
+            do
             {
-                if ((a == 'y') || (a == 'Y'))
+                //review Текст непонятный. Показывать тут текст, который бы понял пользователь, видящий наш интерфейс впервые
+                Console.Write("Просмотреть все результаты FullSquare введите Y/N:");
+                a = char.Parse(Console.ReadLine().ToLower());    //review Тут крашится. Используй TryParse для валидации ввода. 
+                                                                 //или можно сделать ReadKey вместо ReadLine
+                if (a == 'y')
                 {
                     showFlets($"SELECT * FROM Flat " +
                         $"WHERE Tenant = '{name}' OR Tenant is NULL");
-                    break;
-
                 }
-                else
+                else if (a == 'n')
                 {
                     Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
                     var str = Console.ReadLine().Split();   //review проверяй, что длина массива больше или равна 2
@@ -159,18 +158,8 @@ namespace Flats
                     showFlets($"select *" +
                         $" from Flat where FullSquare < {max}" +
                         $" and FullSquare > {min} order by id"); //review тут всё ещё можно увидеть квартиры, забронированные другими
-
-                    Console.Write("Если нет вариантов вернёмся к " +
-                            "полному списку y/n:");
-                    string y_n = Console.ReadLine();
-                    if (y_n == "y")
-                        showFlets($"SELECT * FROM Flat " +
-                            $"WHERE Tenant = '{name}' OR Tenant is NULL");
-                    else
-                        break;
-
                 }
-            }
+            } while(a == 'n' || a == 'y');
         }
 
 
@@ -188,7 +177,7 @@ namespace Flats
                                         //if (name == "admin")
                                         //проверять признак, а не name
 
-                else if (name == null)
+                else if (name == null)  //review перенести пониже
                     return;
 
                 if (name == "admin")    //review админские движухи внутри этого условия - хороший кандидат на вынос в отдельный метод
@@ -205,7 +194,7 @@ namespace Flats
                             Console.Write($"Введите значения полей через пробел" +
                                 $" (rooms (от 1 до 3) floore (от 1 до 18) FullSquare(от 16 до 99)): ");
                             var adStr = Console.ReadLine().Split();
-                            int?[] adInt = new int?[adStr.Length + 1];
+                            int?[] adInt = new int?[adStr.Length + 1]; //review проверять длину массива
                             for (int i = 1; i <= adStr.Length; i++)
                                 adInt[i] = int.Parse(adStr[i - 1]); //review нужна валидация ввода. 
                                                                     //Сейчас при любом некорректном вводе будет необработанное исключение
@@ -215,11 +204,11 @@ namespace Flats
                                 && (adInt[2] > 0 && adInt[2] < 19)
                                 && (adInt[3] > 15 && adInt[3] < 100))
                             {
-                                string tenant = "null"; //review зачем нужна эта переменная?
+                                string tenant = "null"; //review заинлайнить переменную
                                 int lostRowsId = connectDbReturn($"SELECT id from Flat" +
                                     $" order by id desc limit 1 ");
-                                connectDb($"INSERT INTO Flat VALUES" +
-                                   $" ({lostRowsId + 1},{adInt[1]}, {adInt[2]}," +
+                                connectDb($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
+                                   $" ({adInt[1]}, {adInt[2]}," +
                                    $" {adInt[3]}, {tenant})");
                                 showFlets("select * from Flat order by 'id'");
                                 continue;
@@ -249,7 +238,7 @@ namespace Flats
                     continue;       //review перенеси continue в конец if (name == "admin"), который чуть выше
                                     //потому что это по логике это одно и то же условие, так зачем два ифа?
 
-                choice();
+                FlatsViewMode();
 
 
                 while (true)
