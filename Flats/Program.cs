@@ -4,15 +4,9 @@ namespace Flats
 {
     class Program
     {
-        //todo Ситуация. Я отфильтровал квартиры по площади, и не вижу там той, *
-        //которую хочу забронировать.Я теперь хочу вывести все квартиры,чтобы найти её. *
-        //Я не могу это сделать, пока не поставлю бронь. А такая возможность нужна. *
-        //todo сделать айдишник автоинкрементным *
+        //check сделать айдишник автоинкрементным
 
-        //todo добавить признак администратора в таблицу User, чтобы любого
-        //юзера можно было сделать админом или наоборот
-        //todo избавляемся от sql внутри Main. Выносим его в методы: свой для select,
-        //свой для delete и т.д. (а сейчас для всего используется showFlets, и это не очень)
+        //todo избавляемся от sql внутри Main. Выносим его в методы, для каждого отличного от других SQL-запроса отдельный метод.
         //todo зарефачить так чтобы методы были не длиннее 30 строк, классы не длиннее 300.
         //todo после бронирования давать выбор - бронировать ещё или выйти
 
@@ -59,6 +53,8 @@ namespace Flats
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
             using (var reader = command.ExecuteReader())
             {
+                //review если запрос ничего не вернул, мы тут всё равно показываем заголовки. Для пользователя непонятно.
+                //Надо писать "Нет даных", или что-то такое
                 Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
                 while (reader.Read())
                 {
@@ -70,6 +66,7 @@ namespace Flats
 
         }
 
+        //review вот тут хорошо - SQL спрятан внутри метода.
         static string? GetUserPassword(string login)
         {
             string? result = null;
@@ -87,6 +84,7 @@ namespace Flats
             return result;
         }
         static string? name;
+        //review длинный метод
         static string autorise()
         {
             do
@@ -137,12 +135,14 @@ namespace Flats
             return name;
         }
 
-        static void choice()
+        //review длинный метод
+        //review То, что делает метод, должно быть легко объяснить в паре слов. Здесь мне непонятно.
+        static void choice()    
         {
             //review Текст непонятный. Показывать тут текст, который бы понял пользователь, видящий наш интерфейс впервые
             Console.Write("Просмотреть все результаты FullSquare введите Y:"); 
             char a = char.Parse(Console.ReadLine());    //review Тут крашится. Используй TryParse для валидации ввода. 
-                                                        //или можно сделать ReadKey
+                                                        //или можно сделать ReadKey вместо ReadLine
             while (true)
             {
                 if ((a == 'y') || (a == 'Y'))
@@ -155,9 +155,9 @@ namespace Flats
                 else
                 {
                     Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
-                    var str = Console.ReadLine().Split();
-                    int min = int.Parse(str[0]);
-                    int max = int.Parse(str[1]);
+                    var str = Console.ReadLine().Split();   //review проверяй, что длина массива больше или равна 2
+                    int min = int.Parse(str[0]);    //review Тут крашится. Используй TryParse для валидации ввода. 
+                    int max = int.Parse(str[1]);    //review Тут крашится. Используй TryParse для валидации ввода. 
                     showFlets($"select *" +
                         $" from Flat where FullSquare < {max}" +
                         $" and FullSquare > {min} order by id"); //review тут всё ещё можно увидеть квартиры, забронированные другими
@@ -177,7 +177,7 @@ namespace Flats
 
 
         static string? priznak;
-        static void Main(string[] args)
+        static void Main(string[] args) //review длинный метод
         {
             while (true)
             {
@@ -193,7 +193,7 @@ namespace Flats
                 else if (name == null)
                     return;
 
-                if (name == "admin")
+                if (name == "admin")    //review админские движухи внутри этого условия - хороший кандидат на вынос в отдельный метод
                 {
                     Console.WriteLine($"Чем займёмся {name}");
                     showFlets("select * from Flat order by 'id'");
@@ -248,7 +248,7 @@ namespace Flats
 
                 }
                 if (name == "admin")
-                    continue;       //review перенеси continue в конец if, который на 198 строке
+                    continue;       //review перенеси continue в конец if (name == "admin"), который чуть выше
                                     //потому что это по логике это одно и то же условие, так зачем два ифа?
 
                 choice();
