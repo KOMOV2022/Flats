@@ -19,8 +19,9 @@ namespace Flats
             }
 
         }
-        static string? priznakAdmin(string sql) //review параметр убрать, SQL захардкодить внутри метода
+        static string? priznakAdmin() 
         {
+            string sql = $"SELECT big_boss FROM User WHERE login = '{name}'";
             string? someData = "slave"; 
             using (var connection = new FlatDbConnection())
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
@@ -33,9 +34,11 @@ namespace Flats
             }
             return someData;
         }
-        //review убрать
-        static int connectDbReturn(string sql) 
+        static int connectDbReturn() 
         {
+            string sql = $"SELECT id from Flat order by id desc limit 1 ";
+
+
             int someData = 0;
             using (var connection = new FlatDbConnection())
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
@@ -66,7 +69,7 @@ namespace Flats
 
         }
 
-        //review вот тут хорошо - SQL спрятан внутри метода.
+        
         static string? GetUserPassword(string login)
         {
             string? result = null;
@@ -84,8 +87,8 @@ namespace Flats
             return result;
         }
         static string? name;
-        //review длинный метод
-        static string autorise()
+        
+        static string autorise()    //review длинный метод
         {
             do
             {
@@ -169,18 +172,8 @@ namespace Flats
             while (true)
             {
                 string name = autorise();
-                priznak = priznakAdmin($"SELECT big_boss FROM User WHERE login = '{name}'");
+                priznak = priznakAdmin();
                 if (priznak == "master")
-                    name = "admin";     //review менять name плохо, потому что сбивает с толку -
-                                        //ведь имя у админа может быть и отличное от admin.
-                                        //Кроме того, это не нужно, потому что можно на строке
-                                        //if (name == "admin")
-                                        //проверять признак, а не name
-
-                else if (name == null)  //review перенести пониже
-                    return;
-
-                if (name == "admin")    //review админские движухи внутри этого условия - хороший кандидат на вынос в отдельный метод
                 {
                     Console.WriteLine($"Чем займёмся {name}");
                     showFlets("select * from Flat order by 'id'");
@@ -204,12 +197,11 @@ namespace Flats
                                 && (adInt[2] > 0 && adInt[2] < 19)
                                 && (adInt[3] > 15 && adInt[3] < 100))
                             {
-                                string tenant = "null"; //review заинлайнить переменную
-                                int lostRowsId = connectDbReturn($"SELECT id from Flat" +
-                                    $" order by id desc limit 1 ");
+                                 
+                                
                                 connectDb($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
                                    $" ({adInt[1]}, {adInt[2]}," +
-                                   $" {adInt[3]}, {tenant})");
+                                   $" {adInt[3]}, {"null"})");
                                 showFlets("select * from Flat order by 'id'");
                                 continue;
                             }
@@ -233,10 +225,16 @@ namespace Flats
                         else return;
                     }
 
-                }
-                if (name == "admin")
-                    continue;       //review перенеси continue в конец if (name == "admin"), который чуть выше
-                                    //потому что это по логике это одно и то же условие, так зачем два ифа?
+                }   
+                
+
+                //review админские движухи внутри этого условия - хороший кандидат на вынос в отдельный метод
+
+                if (priznak == "master")
+                    continue;
+
+                else if (name == null) 
+                    return;
 
                 FlatsViewMode();
 
