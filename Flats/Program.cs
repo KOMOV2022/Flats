@@ -180,7 +180,7 @@ namespace Flats
         {
             while (true)
             {
-                string name = autorise(); //review локальная переменная не нужна - есть статическое поле, и оно уже инициализируется внутри ф-ии autorise
+                autorise(); //review локальная переменная не нужна - есть статическое поле, и оно уже инициализируется внутри ф-ии autorise
                 priznak = priznakAdmin();
                 //review админские движухи внутри этого условия - хороший кандидат на вынос в отдельный метод
                 if (priznak == "master")
@@ -211,7 +211,7 @@ namespace Flats
                                 
                                 connectDb($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
                                    $" ({adInt[1]}, {adInt[2]}," +
-                                   $" {adInt[3]}, {"null"})");  //review чтобы написать буковки null внутри строки, интерполяция строк не требуется. Можно убрать фигурные скобки и кавычки.
+                                   $" {adInt[3]}, null)"); 
                                 showFlets("select * from Flat order by 'id'");
                                 continue;       //review continue ничего не делает, убрать нафиг
                             }
