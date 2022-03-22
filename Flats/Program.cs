@@ -118,12 +118,15 @@ namespace Flats
                         Console.Write("\n");
                         break;
                     }
-                    else if (key.Key != ConsoleKey.Backspace)   //review не вижу результат стирания символов
-                                                                //По этой теме:
-                                                                //https://stackoverflow.com/questions/3404421/password-masking-console-application
+                    else if (key.Key != ConsoleKey.Backspace) 
                     {
                         password += key.KeyChar;
                         Console.Write("*");
+                    }
+                    else
+                    {
+                        Console.Write("\b \b");
+                        password = password.Remove(password.Length - 1);
                     }
                 }
                 while (true);
