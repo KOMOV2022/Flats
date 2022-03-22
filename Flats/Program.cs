@@ -34,6 +34,7 @@ namespace Flats
             }
             return someData;
         }
+        //review этот метод нигде не используется. Не зря я просил его убрать совсем :)
         static int connectDbReturn() 
         {
             string sql = $"SELECT id from Flat order by id desc limit 1 ";
@@ -179,8 +180,9 @@ namespace Flats
         {
             while (true)
             {
-                string name = autorise();
+                string name = autorise(); //review локальная переменная не нужна - есть статическое поле, и оно уже инициализируется внутри ф-ии autorise
                 priznak = priznakAdmin();
+                //review админские движухи внутри этого условия - хороший кандидат на вынос в отдельный метод
                 if (priznak == "master")
                 {
                     Console.WriteLine($"Чем займёмся {name}");
@@ -209,15 +211,15 @@ namespace Flats
                                 
                                 connectDb($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
                                    $" ({adInt[1]}, {adInt[2]}," +
-                                   $" {adInt[3]}, {"null"})");
+                                   $" {adInt[3]}, {"null"})");  //review чтобы написать буковки null внутри строки, интерполяция строк не требуется. Можно убрать фигурные скобки и кавычки.
                                 showFlets("select * from Flat order by 'id'");
-                                continue;
+                                continue;       //review continue ничего не делает, убрать нафиг
                             }
                             else
                             {
                                 Console.WriteLine($"Значения некорректны." +
                                     $" Будте внимательнее!");
-                                continue;
+                                continue;   //review continue ничего не делает, убрать нафиг
                             }
 
 
@@ -228,16 +230,15 @@ namespace Flats
                             int del = int.Parse(Console.ReadLine());
                             connectDb($"DELETE FROM Flat WHERE id = '{del}'");
                             showFlets("select * from Flat order by 'id'");
-                            continue;
+                            continue;   //review continue ничего не делает, убрать нафиг
                         }
                         else return;
                     }
 
-                }   
-                
+                }
 
-                //review админские движухи внутри этого условия - хороший кандидат на вынос в отдельный метод
-
+                //review (ещё раз) перенеси continue в конец if (priznak == "master"), который чуть выше
+                //Потому что зачем два ифа подряд с одинаковыми условиями?
                 if (priznak == "master")
                     continue;
 
