@@ -34,22 +34,6 @@ namespace Flats
             }
             return someData;
         }
-        //review этот метод нигде не используется. Не зря я просил его убрать совсем :)
-        static int connectDbReturn() 
-        {
-            string sql = $"SELECT id from Flat order by id desc limit 1 ";
-
-
-            int someData = 0;
-            using (var connection = new FlatDbConnection())
-            using (var command = new SQLiteCommand(sql, connection.Sqlite))
-            using (var reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                    someData = reader.GetInt32(0);
-            }
-            return someData;
-        }
 
         static void showFlets(string sql) //review сделать 3(?) разных метода, везде захардкодить SQL
         {
@@ -184,83 +168,77 @@ namespace Flats
             }
         }
 
+        private static void AdminStuff()
+        {
+            Console.WriteLine($"Чем займёмся {name}");
+            showFlets("select * from Flat order by 'id'");
+
+            while (true)
+            {
+                Console.Write("Чтобы добавить запись введите 'add' чтобы удалить 'del': ");
+                string? str = Console.ReadLine();
+                if (str == "add")
+                {
+                    Console.Write($"Введите значения полей через пробел" +
+                        $" (rooms (от 1 до 3) floore (от 1 до 18) FullSquare(от 16 до 99)): ");
+                    var adStr = Console.ReadLine().Split();
+                    int?[] adInt = new int?[adStr.Length + 1]; //review проверять длину массива
+                    for (int i = 1; i <= adStr.Length; i++)
+                        adInt[i] = int.Parse(adStr[i - 1]); //review нужна валидация ввода. 
+                                                            //Сейчас при любом некорректном вводе будет необработанное исключение
+                                                            //используй TryParse
+
+                    if ((adInt[1] < 4 && adInt[1] > 0)
+                        && (adInt[2] > 0 && adInt[2] < 19)
+                        && (adInt[3] > 15 && adInt[3] < 100))
+                    {
+
+
+                        connectDb($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
+                           $" ({adInt[1]}, {adInt[2]}," +
+                           $" {adInt[3]}, null)");
+                        showFlets("select * from Flat order by 'id'");
+                        continue;       //review continue ничего не делает, убрать нафиг
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Значения некорректны." +
+                            $" Будте внимательнее!");
+                        continue;   //review continue ничего не делает, убрать нафиг
+                    }
+
+
+                }
+                else if (str == "del")
+                {
+                    Console.Write("Id строки которую хотите удалить: ");
+                    int del = int.Parse(Console.ReadLine());
+                    connectDb($"DELETE FROM Flat WHERE id = '{del}'");
+                    showFlets("select * from Flat order by 'id'");
+                    continue;   //review continue ничего не делает, убрать нафиг
+                }
+                else return;
+            }
+
+        }
+
 
         static string? priznak;
-        static void Main(string[] args) //review длинный метод
+        static void Main(string[] args) 
         {
             while (true)
             {
                 autorise(); //review локальная переменная не нужна - есть статическое поле, и оно уже инициализируется внутри ф-ии autorise
                 priznak = priznakAdmin();
-                //review админские движухи внутри этого условия - хороший кандидат на вынос в отдельный метод
                 if (priznak == "master")
                 {
-                    Console.WriteLine($"Чем займёмся {name}");
-                    showFlets("select * from Flat order by 'id'");
-
-                    while (true)
-                    {
-                        Console.Write("Чтобы добавить запись введите 'add' чтобы удалить 'del': ");
-                        string? str = Console.ReadLine();
-                        if (str == "add")
-                        {
-                            Console.Write($"Введите значения полей через пробел" +
-                                $" (rooms (от 1 до 3) floore (от 1 до 18) FullSquare(от 16 до 99)): ");
-                            var adStr = Console.ReadLine().Split();
-                            int?[] adInt = new int?[adStr.Length + 1]; //review проверять длину массива
-                            for (int i = 1; i <= adStr.Length; i++)
-                                adInt[i] = int.Parse(adStr[i - 1]); //review нужна валидация ввода. 
-                                                                    //Сейчас при любом некорректном вводе будет необработанное исключение
-                                                                    //используй TryParse
-
-                            if ((adInt[1] < 4 && adInt[1] > 0)
-                                && (adInt[2] > 0 && adInt[2] < 19)
-                                && (adInt[3] > 15 && adInt[3] < 100))
-                            {
-                                 
-                                
-                                connectDb($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
-                                   $" ({adInt[1]}, {adInt[2]}," +
-                                   $" {adInt[3]}, null)"); 
-                                showFlets("select * from Flat order by 'id'");
-                                continue;       //review continue ничего не делает, убрать нафиг
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Значения некорректны." +
-                                    $" Будте внимательнее!");
-                                continue;   //review continue ничего не делает, убрать нафиг
-                            }
-
-
-                        }
-                        else if (str == "del")
-                        {
-                            Console.Write("Id строки которую хотите удалить: ");
-                            int del = int.Parse(Console.ReadLine());
-                            connectDb($"DELETE FROM Flat WHERE id = '{del}'");
-                            showFlets("select * from Flat order by 'id'");
-                            continue;   //review continue ничего не делает, убрать нафиг
-                        }
-                        else return;
-                    }
-
-                }
-
-                //review (ещё раз) перенеси continue в конец if (priznak == "master"), который чуть выше
-                //Потому что зачем два ифа подряд с одинаковыми условиями?
-                if (priznak == "master")
+                    AdminStuff();
                     continue;
-
-                else if (name == null) 
-                    return;
-
+                }
+                else if (name == null) return;
                 FlatsViewMode();
-
-
                 while (true)
                 {
-
                     Console.Write("Какой вариант подходит? Введите 'id':");
                     var idFlat = Console.ReadLine();
                     Book(idFlat);
