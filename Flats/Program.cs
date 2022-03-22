@@ -174,6 +174,16 @@ namespace Flats
             } while(a == 'n' || a == 'y');
         }
 
+        private static void Book(string idFlatStr)
+        {
+            using (var connection = new FlatDbConnection())
+            {
+                var sql = $"update Flat set Tenant = '{name}' WHERE id = {idFlatStr}";
+                using (var command = new SQLiteCommand(sql, connection.Sqlite))
+                    command.ExecuteNonQuery();
+            }
+        }
+
 
         static string? priznak;
         static void Main(string[] args) //review длинный метод
@@ -253,13 +263,7 @@ namespace Flats
 
                     Console.Write("Какой вариант подходит? Введите 'id':");
                     var idFlat = Console.ReadLine();
-                    //review вынести в метод
-                    using (var connection = new FlatDbConnection())
-                    {
-                        var sql = $"update Flat set Tenant = '{name}' WHERE id = {idFlat}";
-                        using (var command = new SQLiteCommand(sql, connection.Sqlite))
-                            command.ExecuteNonQuery();
-                    }
+                    Book(idFlat);
                     showFlets($"select * from Flat where Tenant = '{name}' or Tenant is null");
                     Console.Write("Желаете продолжить? y/n: ");
                     var strFlat = Console.ReadLine();
