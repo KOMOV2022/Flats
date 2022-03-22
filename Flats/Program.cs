@@ -88,7 +88,7 @@ namespace Flats
         }
         static string? name;
         
-        static string autorise()    //review длинный метод
+        static string autorise()
         {
             do
             {
@@ -106,30 +106,7 @@ namespace Flats
                     Console.WriteLine("Wrong login!");
                     continue;
                 }
-                Console.Write("Введите пароль:");
-                //review ввод пароля - хороший кандидат на вынос в отдельный метод.
-                var password = "";
-                ConsoleKeyInfo key;
-                do
-                {
-                    key = Console.ReadKey(true);
-                    if (key.Key == ConsoleKey.Enter)
-                    {
-                        Console.Write("\n");
-                        break;
-                    }
-                    else if (key.Key != ConsoleKey.Backspace) 
-                    {
-                        password += key.KeyChar;
-                        Console.Write("*");
-                    }
-                    else
-                    {
-                        Console.Write("\b \b");
-                        password = password.Remove(password.Length - 1);
-                    }
-                }
-                while (true);
+                var password = GetPasswordFromConsole();
                 if (passwordFromDb != password)
                 {
                     Console.WriteLine("Wrong password!");
@@ -139,6 +116,34 @@ namespace Flats
                 break;
             } while (true);
             return name;
+        }
+
+        private static string GetPasswordFromConsole()
+        {
+            Console.Write("Введите пароль:");
+            var password = "";
+            ConsoleKeyInfo key;
+            do
+            {
+                key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    Console.Write("\n");
+                    break;
+                }
+                else if (key.Key != ConsoleKey.Backspace)
+                {
+                    password += key.KeyChar;
+                    Console.Write("*");
+                }
+                else
+                {
+                    Console.Write("\b \b");
+                    password = password.Remove(password.Length - 1);
+                }
+            }
+            while (true);
+            return password;
         }
 
         static void FlatsViewMode()    
