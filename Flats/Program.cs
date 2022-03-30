@@ -136,10 +136,14 @@ namespace Flats
             char? a = null;
             do
             {
-                //review Текст непонятный. Показывать тут текст, который бы понял пользователь, видящий наш интерфейс впервые
-                Console.Write("Просмотреть все результаты FullSquare введите Y/N:");
-                a = char.Parse(Console.ReadLine().ToLower());    //review Тут крашится. Используй TryParse для валидации ввода. 
-                                                                 //или можно сделать ReadKey вместо ReadLine
+                Console.Write("Просмотреть все доступные для аренды варианты квартир введите Y/N:");
+                bool success = char.TryParse(Console.ReadLine().ToLower(), out char symbol);
+                if (success && (symbol == 'y' || symbol == 'n'))
+                    a = symbol;
+                else
+                {
+                    Console.WriteLine("Неверный символ!");                    
+                }                                                                   
                 if (a == 'y')
                 {
                     showFlets($"SELECT * FROM Flat " +
@@ -155,7 +159,7 @@ namespace Flats
                         $" from Flat where FullSquare < {max}" +
                         $" and FullSquare > {min} order by id"); //review тут всё ещё можно увидеть квартиры, забронированные другими
                 }
-            } while(a == 'n' || a == 'y');
+            } while(a != 'n' || a != 'y');
         }
 
         private static void Book(string idFlatStr)
