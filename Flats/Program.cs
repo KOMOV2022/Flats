@@ -159,7 +159,7 @@ namespace Flats
                         $" from Flat where FullSquare < {max}" +
                         $" and FullSquare > {min} order by id"); //review тут всё ещё можно увидеть квартиры, забронированные другими
                 }
-            } while(a != 'n' || a != 'y');
+            } while(a != 'n' || a != 'y'); //review этот цикл не может закончиться никак :)
         }
 
         private static void Book(string idFlatStr)
