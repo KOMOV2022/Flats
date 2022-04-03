@@ -171,8 +171,8 @@ namespace Flats
                                     max = numberMax;
 
                                     showFlets($"select *" +
-                                        $" from Flat where FullSquare < {max}" +
-                                        $" and FullSquare > {min} order by id");
+                                        $" from Flat where (Tenant = '{name}' OR Tenant is NULL) and FullSquare < {max}" +
+                                        $" and FullSquare > {min} order by id ");
                                 }
                                 else
                                 {
@@ -198,8 +198,6 @@ namespace Flats
                     Console.WriteLine("Неверный символ!");
                     continue;
                 }
-
-                      //review тут всё ещё можно увидеть квартиры, забронированные другими
 
             } while (true);
         }   
