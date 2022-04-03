@@ -131,36 +131,77 @@ namespace Flats
             return password;
         }
 
-        static void FlatsViewMode()    
+        static void FlatsViewMode()
         {
             char? a = null;
             do
             {
+
                 Console.Write("Просмотреть все доступные для аренды варианты квартир введите Y/N:");
                 bool success = char.TryParse(Console.ReadLine().ToLower(), out char symbol);
                 if (success && (symbol == 'y' || symbol == 'n'))
+                {
+                    
                     a = symbol;
+                    if (a == 'y')
+                    {
+                        showFlets($"SELECT * FROM Flat " +
+                            $"WHERE Tenant = '{name}' OR Tenant is NULL");
+                    }
+                    else if (a == 'n')
+                    {
+                        bool syclo = false;
+
+                        do
+                        {
+                            syclo = false;
+                            Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
+                            var str = Console.ReadLine().Split();
+                            int min = 0;
+                            int max = 0;
+
+                            if (str.Length == 2)
+                            {
+                                bool succesMin = int.TryParse(str[0], out int numberMin);
+                                bool succesMax = int.TryParse(str[1], out int numberMax);
+                                if (succesMin && succesMax && (numberMin > 0 && numberMin < 100) && (numberMax > 0 && numberMax < 100))
+                                {
+                                    min = numberMin;
+                                    max = numberMax;
+
+                                    showFlets($"select *" +
+                                        $" from Flat where FullSquare < {max}" +
+                                        $" and FullSquare > {min} order by id");
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Уберите мусор с поля!");
+                                    syclo = true;
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Неверный ввод!");
+                                syclo = true;
+
+                                
+                            }
+
+                        } while (syclo);
+                    }
+                    break;
+                }
+
                 else
                 {
-                    Console.WriteLine("Неверный символ!");                    
-                }                                                                   
-                if (a == 'y')
-                {
-                    showFlets($"SELECT * FROM Flat " +
-                        $"WHERE Tenant = '{name}' OR Tenant is NULL");
+                    Console.WriteLine("Неверный символ!");
+                    continue;
                 }
-                else if (a == 'n')
-                {
-                    Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
-                    var str = Console.ReadLine().Split();   //review проверяй, что длина массива больше или равна 2
-                    int min = int.Parse(str[0]);    //review Тут крашится. Используй TryParse для валидации ввода. 
-                    int max = int.Parse(str[1]);    //review Тут крашится. Используй TryParse для валидации ввода. 
-                    showFlets($"select *" +
-                        $" from Flat where FullSquare < {max}" +
-                        $" and FullSquare > {min} order by id"); //review тут всё ещё можно увидеть квартиры, забронированные другими
-                }
-            } while(a != 'n' || a != 'y');
-        }
+
+                      //review тут всё ещё можно увидеть квартиры, забронированные другими
+
+            } while (true);
+        }   
 
         private static void Book(string idFlatStr)
         {
