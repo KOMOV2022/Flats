@@ -5,13 +5,22 @@ namespace Flats
     class Program
     {
         //todo зарефачить так чтобы методы были не длиннее 30 строк, классы не длиннее 300.
-        static void connectDb(string sql)   //review два метода сделать - один для добавления, другой для удаления,
-                                            //И в обоих SQL внутри захардкодить
+        static void connectDbAdd(int ROOMS,int FLOORE,int FULLSQUARE) 
         {
             using (var connection = new FlatDbConnection())
             {
+                using (var command = new SQLiteCommand($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
+                           $" ({ROOMS}, {FLOORE}," +
+                           $" {FULLSQUARE}, null)", connection.Sqlite))
+                    command.ExecuteNonQuery();
+            }
 
-                using (var command = new SQLiteCommand(sql, connection.Sqlite))
+        }
+        static void connectDbDel(int id) 
+        {
+            using (var connection = new FlatDbConnection())
+            {
+                using (var command = new SQLiteCommand($"DELETE FROM Flat WHERE id = '{id}'", connection.Sqlite))
                     command.ExecuteNonQuery();
             }
 
@@ -255,7 +264,7 @@ namespace Flats
                     Console.Write($"Введите значения полей через пробел" +
                         $" (rooms (от 1 до 3) floore (от 1 до 18) FullSquare(от 16 до 99)): ");
                     var adStr = Console.ReadLine().Split();
-                    int?[] adInt = new int?[adStr.Length + 1]; //review проверять длину массива
+                    var adInt = new int[adStr.Length + 1]; //review проверять длину массива
                     for (int i = 1; i <= adStr.Length; i++)
                         adInt[i] = int.Parse(adStr[i - 1]); //review нужна валидация ввода. 
                                                             //Сейчас при любом некорректном вводе будет необработанное исключение
@@ -267,9 +276,7 @@ namespace Flats
                     {
 
 
-                        connectDb($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
-                           $" ({adInt[1]}, {adInt[2]}," +
-                           $" {adInt[3]}, null)");
+                        connectDbAdd(adInt[1], adInt[2], adInt[3]);
                         showFletss();
                         continue;       //review continue ничего не делает, убрать нафиг
                     }
@@ -286,7 +293,7 @@ namespace Flats
                 {
                     Console.Write("Id строки которую хотите удалить: ");
                     int del = int.Parse(Console.ReadLine());
-                    connectDb($"DELETE FROM Flat WHERE id = '{del}'");
+                    connectDbDel(del);
                     showFletss();
                     continue;   //review continue ничего не делает, убрать нафиг
                 }
