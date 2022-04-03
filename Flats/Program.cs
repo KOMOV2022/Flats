@@ -41,9 +41,8 @@ namespace Flats
             using (var command = new SQLiteCommand(sql, connection.Sqlite))
             using (var reader = command.ExecuteReader())
             {
-                //review если запрос ничего не вернул, мы тут всё равно показываем заголовки. Для пользователя непонятно.
-                //Надо писать "Нет даных", или что-то такое
-                Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
+                if (reader.HasRows) Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
+                else Console.WriteLine($"Нет таких данных");
                 while (reader.Read())
                 {
                     Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
