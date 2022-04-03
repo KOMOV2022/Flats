@@ -131,6 +131,7 @@ namespace Flats
             return password;
         }
 
+        //todo длинный метод
         static void FlatsViewMode()
         {
             char? a = null;
