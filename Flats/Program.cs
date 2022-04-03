@@ -4,7 +4,6 @@ namespace Flats
 {
     class Program
     {
-        //todo избавляемся от sql внутри Main. Выносим его в методы, для каждого отличного от других SQL-запроса отдельный метод.
         //todo зарефачить так чтобы методы были не длиннее 30 строк, классы не длиннее 300.
         //todo после бронирования давать выбор - бронировать ещё или выйти
 
@@ -34,11 +33,47 @@ namespace Flats
             }
             return someData;
         }
-
-        static void showFlets(string sql) //review сделать 3(?) разных метода, везде захардкодить SQL
+        static void showFletss() 
         {
             using (var connection = new FlatDbConnection())
-            using (var command = new SQLiteCommand(sql, connection.Sqlite))
+            using (var command = new SQLiteCommand($"SELECT * FROM Flat ", connection.Sqlite))
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.HasRows) Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
+                else Console.WriteLine($"Нет таких данных");
+                while (reader.Read())
+                {
+                    Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
+                       $"{reader["floore"]}\t{reader["FullSquare"]}\t  {reader["Tenant"]}");
+
+                }
+            }
+
+        }
+        static void showFletsBySqare(int min,int max)
+        {
+            using (var connection = new FlatDbConnection())
+            using (var command = new SQLiteCommand($"select *" +
+                                        $" from Flat where (Tenant = '{name}' OR Tenant is NULL) and FullSquare < {max}" +
+                                        $" and FullSquare > {min} order by id ", connection.Sqlite))
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.HasRows) Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
+                else Console.WriteLine($"Нет таких данных");
+                while (reader.Read())
+                {
+                    Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
+                       $"{reader["floore"]}\t{reader["FullSquare"]}\t  {reader["Tenant"]}");
+
+                }
+            }
+
+        }
+        static void showFletsByUser()
+        {
+            using (var connection = new FlatDbConnection())
+            using (var command = new SQLiteCommand($"SELECT * FROM Flat " +
+                            $"WHERE Tenant = '{name}' OR Tenant is NULL", connection.Sqlite))
             using (var reader = command.ExecuteReader())
             {
                 if (reader.HasRows) Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
@@ -53,7 +88,7 @@ namespace Flats
 
         }
 
-        
+
         static string? GetUserPassword(string login)
         {
             string? result = null;
@@ -145,8 +180,7 @@ namespace Flats
                     a = symbol;
                     if (a == 'y')
                     {
-                        showFlets($"SELECT * FROM Flat " +
-                            $"WHERE Tenant = '{name}' OR Tenant is NULL");
+                        showFletsByUser();
                     }
                     else if (a == 'n')
                     {
@@ -169,9 +203,7 @@ namespace Flats
                                     min = numberMin;
                                     max = numberMax;
 
-                                    showFlets($"select *" +
-                                        $" from Flat where (Tenant = '{name}' OR Tenant is NULL) and FullSquare < {max}" +
-                                        $" and FullSquare > {min} order by id ");
+                                    showFletsBySqare(min,max);
                                 }
                                 else
                                 {
@@ -214,7 +246,7 @@ namespace Flats
         private static void AdminStuff()
         {
             Console.WriteLine($"Чем займёмся {name}");
-            showFlets("select * from Flat order by 'id'");
+            showFletss();
 
             while (true)
             {
@@ -240,7 +272,7 @@ namespace Flats
                         connectDb($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
                            $" ({adInt[1]}, {adInt[2]}," +
                            $" {adInt[3]}, null)");
-                        showFlets("select * from Flat order by 'id'");
+                        showFletss();
                         continue;       //review continue ничего не делает, убрать нафиг
                     }
                     else
@@ -257,7 +289,7 @@ namespace Flats
                     Console.Write("Id строки которую хотите удалить: ");
                     int del = int.Parse(Console.ReadLine());
                     connectDb($"DELETE FROM Flat WHERE id = '{del}'");
-                    showFlets("select * from Flat order by 'id'");
+                    showFletss();
                     continue;   //review continue ничего не делает, убрать нафиг
                 }
                 else return;
@@ -285,7 +317,7 @@ namespace Flats
                     Console.Write("Какой вариант подходит? Введите 'id':");
                     var idFlat = Console.ReadLine();
                     Book(idFlat);
-                    showFlets($"select * from Flat where Tenant = '{name}' or Tenant is null");
+                    showFletsByUser();
                     Console.Write("Желаете продолжить? y/n: ");
                     var strFlat = Console.ReadLine();
                     if (strFlat == "y")
