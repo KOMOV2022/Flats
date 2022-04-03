@@ -5,6 +5,7 @@ namespace Flats
     class Program
     {
         //todo зарефачить так чтобы методы были не длиннее 30 строк, классы не длиннее 300.
+        //todo три повторения
         static void connectDbAdd(int ROOMS,int FLOORE,int FULLSQUARE) 
         {
             using (var connection = new FlatDbConnection())
@@ -16,6 +17,7 @@ namespace Flats
             }
 
         }
+        //todo три повторения
         static void connectDbDel(int id) 
         {
             using (var connection = new FlatDbConnection())
@@ -40,6 +42,7 @@ namespace Flats
             }
             return someData;
         }
+        //todo три повторения
         static void showFletss() 
         {
             using (var connection = new FlatDbConnection())
@@ -55,8 +58,8 @@ namespace Flats
 
                 }
             }
-
         }
+        //todo три повторения
         static void showFletsBySqare(int min,int max)
         {
             using (var connection = new FlatDbConnection())
@@ -76,6 +79,7 @@ namespace Flats
             }
 
         }
+        //todo три повторения
         static void showFletsByUser()
         {
             using (var connection = new FlatDbConnection())
@@ -89,10 +93,8 @@ namespace Flats
                 {
                     Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
                        $"{reader["floore"]}\t{reader["FullSquare"]}\t  {reader["Tenant"]}");
-
                 }
             }
-
         }
 
 
@@ -238,8 +240,9 @@ namespace Flats
                 }
 
             } while (true);
-        }   
+        }
 
+        //todo три повторения
         private static void Book(string idFlatStr)
         {
             using (var connection = new FlatDbConnection())
@@ -250,6 +253,7 @@ namespace Flats
             }
         }
 
+        //todo длинный метод
         private static void AdminStuff()
         {
             Console.WriteLine($"Чем займёмся {name}");
@@ -274,17 +278,13 @@ namespace Flats
                         && (adInt[2] > 0 && adInt[2] < 19)
                         && (adInt[3] > 15 && adInt[3] < 100))
                     {
-
-
                         connectDbAdd(adInt[1], adInt[2], adInt[3]);
                         showFletss();
-                        continue;       //review continue ничего не делает, убрать нафиг
                     }
                     else
                     {
                         Console.WriteLine($"Значения некорректны." +
                             $" Будте внимательнее!");
-                        continue;   //review continue ничего не делает, убрать нафиг
                     }
 
 
@@ -295,7 +295,6 @@ namespace Flats
                     int del = int.Parse(Console.ReadLine());
                     connectDbDel(del);
                     showFletss();
-                    continue;   //review continue ничего не делает, убрать нафиг
                 }
                 else return;
             }
@@ -308,7 +307,7 @@ namespace Flats
         {
             while (true)
             {
-                autorise(); //review локальная переменная не нужна - есть статическое поле, и оно уже инициализируется внутри ф-ии autorise
+                autorise();
                 priznak = priznakAdmin();
                 if (priznak == "master")
                 {
