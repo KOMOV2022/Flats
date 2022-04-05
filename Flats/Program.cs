@@ -175,70 +175,55 @@ namespace Flats
         }
 
         //todo длинный метод
-        static void FlatsViewMode()
+        static void FlatsViewModeByFullSquare()
         {
-            char? a = null;
+            bool syclo = false;
             do
             {
-
+                syclo = false;
+                Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
+                var str = Console.ReadLine().Split();
+                int min = 0;
+                int max = 0;
+                if (str.Length == 2)
+                {
+                    bool succesMin = int.TryParse(str[0], out int numberMin);
+                    bool succesMax = int.TryParse(str[1], out int numberMax);
+                    if (succesMin && succesMax && (numberMin > 0 && numberMin < 100) && (numberMax > 0 && numberMax < 100))
+                    {
+                        min = numberMin;
+                        max = numberMax;
+                        showFletsBySqare(min, max);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Уберите мусор с поля!");
+                        syclo = true;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Неверный ввод!");
+                    syclo = true;
+                }
+            } while (syclo);
+        }
+        static void FlatsViewMode()
+        {
+            do
+            {
                 Console.Write("Просмотреть все доступные для аренды варианты квартир введите Y/N:");
                 bool success = char.TryParse(Console.ReadLine().ToLower(), out char symbol);
                 if (success && (symbol == 'y' || symbol == 'n'))
                 {
-                    
-                    a = symbol;
-                    if (a == 'y')
-                    {
+                    if (symbol == 'y')
                         showFletsByUser();
-                    }
-                    else if (a == 'n')
-                    {
-                        bool syclo = false;
-
-                        do
-                        {
-                            syclo = false;
-                            Console.Write("Тогда введите диапазон FullSquare (min) пробел (max):");
-                            var str = Console.ReadLine().Split();
-                            int min = 0;
-                            int max = 0;
-
-                            if (str.Length == 2)
-                            {
-                                bool succesMin = int.TryParse(str[0], out int numberMin);
-                                bool succesMax = int.TryParse(str[1], out int numberMax);
-                                if (succesMin && succesMax && (numberMin > 0 && numberMin < 100) && (numberMax > 0 && numberMax < 100))
-                                {
-                                    min = numberMin;
-                                    max = numberMax;
-
-                                    showFletsBySqare(min,max);
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Уберите мусор с поля!");
-                                    syclo = true;
-                                }
-                            }
-                            else
-                            {
-                                Console.WriteLine("Неверный ввод!");
-                                syclo = true;
-
-                                
-                            }
-
-                        } while (syclo);
-                    }
-                    break;
+                    else if (symbol == 'n')
+                        FlatsViewModeByFullSquare();
+                 break;
                 }
-
                 else
-                {
                     Console.WriteLine("Неверный символ!");
-                    continue;
-                }
-
             } while (true);
         }
 
