@@ -4,28 +4,31 @@ namespace Flats
 {
     class Program
     {
-        //todo зарефачить так чтобы методы были не длиннее 30 строк, классы не длиннее 300.
-        //todo три повторения
+        static void connectDbAddSql(string sql)
+        {
+            using (var connection = new FlatDbConnection())
+            {
+                using (var command = new SQLiteCommand(sql, connection.Sqlite))
+                    command.ExecuteNonQuery();
+            }
+        }
         static void connectDbAdd(int ROOMS,int FLOORE,int FULLSQUARE) 
         {
-            using (var connection = new FlatDbConnection())
-            {
-                using (var command = new SQLiteCommand($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
+            connectDbAddSql($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
                            $" ({ROOMS}, {FLOORE}," +
-                           $" {FULLSQUARE}, null)", connection.Sqlite))
-                    command.ExecuteNonQuery();
-            }
-
+                           $" {FULLSQUARE}, null)");
         }
-        //todo три повторения
-        static void connectDbDel(int id) 
+        static void connectDbDelSql(string sql)
         {
             using (var connection = new FlatDbConnection())
             {
-                using (var command = new SQLiteCommand($"DELETE FROM Flat WHERE id = '{id}'", connection.Sqlite))
+                using (var command = new SQLiteCommand(sql, connection.Sqlite))
                     command.ExecuteNonQuery();
             }
-
+        }
+        static void connectDbDel(int id) 
+        {
+            connectDbAddSql($"DELETE FROM Flat WHERE id = '{id}'");
         }
         static string? priznakAdmin() 
         {
