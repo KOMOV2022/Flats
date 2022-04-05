@@ -173,8 +173,6 @@ namespace Flats
             while (true);
             return password;
         }
-
-        //todo длинный метод
         static void FlatsViewModeByFullSquare()
         {
             bool syclo = false;
@@ -239,6 +237,32 @@ namespace Flats
         }
 
         //todo длинный метод
+        private static void AdminStuffAddValid()
+        {
+            var adStr = Console.ReadLine().Split();
+
+            if (adStr.Length == 3)
+            {
+                var adInt = new int[adStr.Length + 1];
+                for (int i = 1; i <= adStr.Length; i++)
+                {
+                    bool success = int.TryParse(adStr[i - 1], out int num);
+                    adInt[i] = num;
+                }
+                if ((adInt[1] < 4 && adInt[1] > 0)
+                    && (adInt[2] > 0 && adInt[2] < 19)
+                    && (adInt[3] > 15 && adInt[3] < 100))
+                {
+                    connectDbAdd(adInt[1], adInt[2], adInt[3]);
+                    showFletss();
+                }
+                else
+                {
+                    Console.WriteLine($"Значения некорректны." +
+                        $" Будте внимательнее!");
+                }
+            }
+        }
         private static void AdminStuff()
         {
             Console.WriteLine($"Чем займёмся {name}");
@@ -252,27 +276,7 @@ namespace Flats
                 {
                     Console.Write($"Введите значения полей через пробел" +
                         $" (rooms (от 1 до 3) floore (от 1 до 18) FullSquare(от 16 до 99)): ");
-                    var adStr = Console.ReadLine().Split();
-                    var adInt = new int[adStr.Length + 1]; //review проверять длину массива
-                    for (int i = 1; i <= adStr.Length; i++)
-                        adInt[i] = int.Parse(adStr[i - 1]); //review нужна валидация ввода. 
-                                                            //Сейчас при любом некорректном вводе будет необработанное исключение
-                                                            //используй TryParse
-
-                    if ((adInt[1] < 4 && adInt[1] > 0)
-                        && (adInt[2] > 0 && adInt[2] < 19)
-                        && (adInt[3] > 15 && adInt[3] < 100))
-                    {
-                        connectDbAdd(adInt[1], adInt[2], adInt[3]);
-                        showFletss();
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Значения некорректны." +
-                            $" Будте внимательнее!");
-                    }
-
-
+                    AdminStuffAddValid();
                 }
                 else if (str == "del")
                 {
