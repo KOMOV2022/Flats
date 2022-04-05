@@ -18,14 +18,6 @@ namespace Flats
                            $" ({ROOMS}, {FLOORE}," +
                            $" {FULLSQUARE}, null)");
         }
-        static void connectDbDelSql(string sql)
-        {
-            using (var connection = new FlatDbConnection())
-            {
-                using (var command = new SQLiteCommand(sql, connection.Sqlite))
-                    command.ExecuteNonQuery();
-            }
-        }
         static void connectDbDel(int id) 
         {
             connectDbAddSql($"DELETE FROM Flat WHERE id = '{id}'");
