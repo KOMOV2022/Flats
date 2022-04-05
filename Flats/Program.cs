@@ -235,8 +235,6 @@ namespace Flats
                     command.ExecuteNonQuery();
             }
         }
-
-        //todo длинный метод
         private static void AdminStuffAddValid()
         {
             var adStr = Console.ReadLine().Split();
