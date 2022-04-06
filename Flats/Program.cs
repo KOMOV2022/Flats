@@ -24,43 +24,20 @@ namespace Flats
         }
         static string? priznakAdmin() 
         {
-            string sql = $"SELECT big_boss FROM User WHERE login = '{name}'";
-            string? someData = "slave"; 
-            using (var connection = new FlatDbConnection())
-            using (var command = new SQLiteCommand(sql, connection.Sqlite))
-            using (var reader = command.ExecuteReader())
-            {
-                if (reader.HasRows)
-                    while(reader.Read())
-                        someData = reader.GetString(0);
-
-            }
+            string? someData = "slave";
+            showFletsBySql($"SELECT big_boss FROM User WHERE login = '{name}'");
             return someData;
         }
         //todo три повторения
         static void showFletss() 
         {
-            using (var connection = new FlatDbConnection())
-            using (var command = new SQLiteCommand($"SELECT * FROM Flat ", connection.Sqlite))
-            using (var reader = command.ExecuteReader())
-            {
-                if (reader.HasRows) Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
-                else Console.WriteLine($"Нет таких данных");
-                while (reader.Read())
-                {
-                    Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
-                       $"{reader["floore"]}\t{reader["FullSquare"]}\t  {reader["Tenant"]}");
-
-                }
-            }
+            showFletsBySql($"SELECT * FROM Flat ");
         }
         //todo три повторения
-        static void showFletsBySqare(int min,int max)
+        static void showFletsBySql(string sql)
         {
             using (var connection = new FlatDbConnection())
-            using (var command = new SQLiteCommand($"select *" +
-                                        $" from Flat where (Tenant = '{name}' OR Tenant is NULL) and FullSquare < {max}" +
-                                        $" and FullSquare > {min} order by id ", connection.Sqlite))
+            using (var command = new SQLiteCommand(sql, connection.Sqlite))
             using (var reader = command.ExecuteReader())
             {
                 if (reader.HasRows) Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
@@ -72,41 +49,26 @@ namespace Flats
 
                 }
             }
+        } 
+
+        static void showFletsBySqare(int min,int max)
+        {
+            showFletsBySql($"select *" + $" from Flat where (Tenant = '{name}' OR Tenant is NULL) and FullSquare < {max}" +
+                                        $" and FullSquare > {min} order by id ");
 
         }
         //todo три повторения
         static void showFletsByUser()
         {
-            using (var connection = new FlatDbConnection())
-            using (var command = new SQLiteCommand($"SELECT * FROM Flat " +
-                            $"WHERE Tenant = '{name}' OR Tenant is NULL", connection.Sqlite))
-            using (var reader = command.ExecuteReader())
-            {
-                if (reader.HasRows) Console.WriteLine($"ID  ROOMS   FLOORE   FULLSQUARE   TENANT");
-                else Console.WriteLine($"Нет таких данных");
-                while (reader.Read())
-                {
-                    Console.WriteLine($"{reader["ID"]}\t{reader["rooms"]}\t" +
-                       $"{reader["floore"]}\t{reader["FullSquare"]}\t  {reader["Tenant"]}");
-                }
-            }
+            showFletsBySql($"SELECT * FROM Flat " +
+                            $"WHERE Tenant = '{name}' OR Tenant is NULL");
         }
 
 
         static string? GetUserPassword(string login)
         {
             string? result = null;
-            using (var connection = new FlatDbConnection())
-            {
-                var sql = $"select * from User where login = '{login}'";
-                using (var command = new SQLiteCommand(sql, connection.Sqlite))
-                using (var reader = command.ExecuteReader())
-                {
-                    if (reader.HasRows)
-                        while (reader.Read())
-                            result = reader["password"].ToString();
-                }
-            }
+            showFletsBySql($"select * from User where login = '{login}'");
             return result;
         }
         static string? name;
