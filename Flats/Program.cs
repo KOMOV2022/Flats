@@ -4,6 +4,9 @@ namespace Flats
 {
     class Program
     {
+        private static string? priznak;
+        private static string? name;
+
         static void connectDbAddSql(string sql)
         {
             using (var connection = new FlatDbConnection())
@@ -12,28 +15,39 @@ namespace Flats
                     command.ExecuteNonQuery();
             }
         }
+
         static void connectDbAdd(int ROOMS,int FLOORE,int FULLSQUARE) 
         {
-            connectDbAddSql($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) VALUES" +
-                           $" ({ROOMS}, {FLOORE}," +
-                           $" {FULLSQUARE}, null)");
+            connectDbAddSql($"INSERT INTO Flat (ROOMS, FLOORE,   FULLSQUARE,   TENANT) " +
+                $"VALUES ({ROOMS}, {FLOORE} {FULLSQUARE}, null)");
         }
+
         static void connectDbDel(int id) 
         {
             connectDbAddSql($"DELETE FROM Flat WHERE id = '{id}'");
         }
+
         static string? priznakAdmin() 
         {
+            string sql = $"SELECT big_boss FROM User WHERE login = '{name}'";
             string? someData = "slave";
-            showFletsBySql($"SELECT big_boss FROM User WHERE login = '{name}'");
+            using (var connection = new FlatDbConnection())
+            using (var command = new SQLiteCommand(sql, connection.Sqlite))
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.HasRows)
+                    while (reader.Read())
+                        someData = reader.GetString(0);
+
+            }
             return someData;
         }
-        //todo три повторения
+
         static void showFletss() 
         {
             showFletsBySql($"SELECT * FROM Flat ");
         }
-        //todo три повторения
+
         static void showFletsBySql(string sql)
         {
             using (var connection = new FlatDbConnection())
@@ -57,21 +71,30 @@ namespace Flats
                                         $" and FullSquare > {min} order by id ");
 
         }
-        //todo три повторения
+
         static void showFletsByUser()
         {
             showFletsBySql($"SELECT * FROM Flat " +
                             $"WHERE Tenant = '{name}' OR Tenant is NULL");
         }
 
-
         static string? GetUserPassword(string login)
         {
             string? result = null;
-            showFletsBySql($"select * from User where login = '{login}'");
+            using (var connection = new FlatDbConnection())
+            {
+                var sql = $"select * from User where login = '{login}'";
+                using (var command = new SQLiteCommand(sql, connection.Sqlite))
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                        while (reader.Read())
+                            result = reader["password"].ToString();
+                }
+            }
             return result;
         }
-        static string? name;
+        
         
         static string autorise()
         {
@@ -130,6 +153,7 @@ namespace Flats
             while (true);
             return password;
         }
+
         static void FlatsViewModeByFullSquare()
         {
             bool syclo = false;
@@ -163,6 +187,7 @@ namespace Flats
                 }
             } while (syclo);
         }
+
         static void FlatsViewMode()
         {
             do
@@ -182,16 +207,11 @@ namespace Flats
             } while (true);
         }
 
-        //todo три повторения
-        private static void Book(string idFlatStr)
+        private static void Book(int idFlat)
         {
-            using (var connection = new FlatDbConnection())
-            {
-                var sql = $"update Flat set Tenant = '{name}' WHERE id = {idFlatStr}";
-                using (var command = new SQLiteCommand(sql, connection.Sqlite))
-                    command.ExecuteNonQuery();
-            }
+            connectDbAddSql($"update Flat set Tenant = '{name}' WHERE id = {idFlat}");
         }
+
         private static void AdminStuffAddValid()
         {
             var adStr = Console.ReadLine().Split();
@@ -218,6 +238,7 @@ namespace Flats
                 }
             }
         }
+
         private static void AdminStuff()
         {
             Console.WriteLine($"Чем займёмся {name}");
@@ -245,8 +266,6 @@ namespace Flats
 
         }
 
-
-        static string? priznak;
         static void Main(string[] args) 
         {
             while (true)
@@ -263,8 +282,13 @@ namespace Flats
                 while (true)
                 {
                     Console.Write("Какой вариант подходит? Введите 'id':");
-                    var idFlat = Console.ReadLine();
-                    Book(idFlat);
+                    var idFlatStr = Console.ReadLine();
+                    if(int.TryParse(idFlatStr, out var idFlat)) Book(idFlat);
+                    else
+                    {
+                        Console.WriteLine($"Некорректный ввод. '{idFlatStr}' не является идентификатором.");
+                        break;
+                    }
                     showFletsByUser();
                     Console.Write("Желаете продолжить? y/n: ");
                     var strFlat = Console.ReadLine();
